@@ -29,3 +29,24 @@ func WrapErr(e error) Result {
 func Pipe(r Result, bs ...Binder) Result {
 	return r.BindAll(bs...)
 }
+
+// Handle takes the values from a potentially error-prone operation
+// and wraps the value or the error.
+func Handle(val interface{}, err error) Result {
+	if err != nil {
+		return WrapErr(err)
+	}
+
+	return Wrap(val)
+}
+
+// HandleWith takes the values from a potentially error-prone operation.
+// If the op returns an error, the error is wrapped and returned.
+// If not, the transformer fn is called on the value and then wrapped.
+func HandleWith(val interface{}, err error, transform func(val interface{}) interface{}) Result {
+	if err != nil {
+		return WrapErr(err)
+	}
+
+	return Wrap(transform(val))
+}
