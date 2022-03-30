@@ -1,3 +1,5 @@
 package option
 
-type Some struct {}
+type Some[T any] struct {
+	data T
+}

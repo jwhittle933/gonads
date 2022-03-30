@@ -1,41 +1,47 @@
 package result
 
-type Err struct {
+type err[T any] struct {
 	err error
 }
 
-func (e Err) Bind(Binder) Result {
+func (e err[T]) Bind(Binder[T]) Result[T] {
 	return e
 }
 
-func (e Err) BindAll(...Binder) Result {
+func (e err[T]) BindAll(...Binder[T]) Result[T] {
 	return e
 }
 
-func (e Err) Tee(Tee) Result {
+func (e err[T]) Tee(Tee[T]) Result[T] {
 	return e
 }
 
-func (Err) Ok() interface{} {
-	return nil
+func (err[T]) Ok() (t T) {
+	return
 }
 
-func (e Err) Err() error {
+func (e err[T]) Err() error {
 	return e.err
 }
 
-func (Err) IsOk() bool {
+func (err[T]) IsOk() bool {
 	return false
 }
 
-func (Err) IsErr() bool {
+func (err[T]) IsErr() bool {
 	return true
 }
-func (e Err) Expect(msg string) interface{} {
+
+// Expect on err panics with message.
+// Only call this if you intend to crash the program
+// or handle the panic with `recover`.
+func (e err[T]) Expect(msg string) T {
 	panic(msg)
 }
 
-func (e Err) Unwrap() interface{} {
+// Unwrap on err panics.
+// Only call this if you intend to crash the program
+// or handle the panic with `recover`.
+func (e err[T]) Unwrap() T {
 	panic("attempted to unwrap an error")
 }
-

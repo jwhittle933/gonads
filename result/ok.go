@@ -1,48 +1,47 @@
 package result
 
-type Ok struct {
-	data interface{}
+type ok[T any] struct {
+	data T
 }
 
-func (o Ok) Bind(b Binder) Result {
-	return b(o)
+func (o ok[T]) Bind(fn Binder[T]) Result[T] {
+	return fn(o.data)
 }
 
-func (o Ok) BindAll(bs ...Binder) Result {
-	var out Result
-	for _, b := range bs {
-		out = b(o.data)
+func (o ok[T]) BindAll(fns ...Binder[T]) Result[T] {
+	var out Result[T] = o
+	for _, fn := range fns {
+		out = out.Bind(fn)
 	}
 
 	return out
 }
 
-func (o Ok) Tee(t Tee) Result {
-	t(o.data)
+func (o ok[T]) Tee(fn Tee[T]) Result[T] {
+	fn(o.data)
 	return o
 }
 
-func (o Ok) Ok() interface{} {
+func (o ok[T]) Ok() T {
 	return o.data
 }
 
-func (Ok) IsOk() bool {
+func (ok[T]) IsOk() bool {
 	return true
 }
 
-func (Ok) IsErr() bool {
+func (ok[T]) IsErr() bool {
 	return false
 }
 
-func (Ok) Err() error {
+func (ok[T]) Err() error {
 	return nil
 }
 
-func (o Ok) Expect(string) interface{} {
+func (o ok[T]) Expect(string) T {
 	return o.Ok()
 }
 
-func (o Ok) Unwrap() interface{} {
+func (o ok[T]) Unwrap() T {
 	return o.Ok()
 }
-
