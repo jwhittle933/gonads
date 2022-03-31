@@ -1,5 +1,5 @@
-// Package result is an implementation of functional Results, modeled
-// on Rust's `std::result::Result`.
+// Package result is an implementation of functional Results,
+// loosely modeled on Rust's `std::result::Result`.
 package result
 
 // Binder is a callback function to operate on the underlying
@@ -11,6 +11,8 @@ type Binder[T any] func(data T) Result[T]
 // for use with referenced data, i.e., `&customStruct{}`. Alternatively,
 // Tee is ideal for side-effects, i.e., logging, etc.
 type Tee[T any] func(data T)
+
+type Mapper[T any, U any] func(data T) Result[U]
 
 // Result represents a proy operation that can succeed or fail.
 // It wraps either an `ok` operation or an `error` operation.
@@ -63,4 +65,14 @@ func Err[T any](e error) Result[T] {
 // Pipe creates reusable result pipelines
 func Pipe[T any](r Result[T], bs ...Binder[T]) Result[T] {
 	return r.BindAll(bs...)
+}
+
+// Map applies `fn` to Result[T] which converts to
+// Result[U]
+func Map[T, U any](r Result[T], fn Mapper[T, U]) Result[U] {
+	if r.IsErr() {
+		return Err[U](r.Err())
+	}
+
+	return fn(r.Unwrap())
 }
